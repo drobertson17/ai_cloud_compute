@@ -6,11 +6,19 @@ authors = ["Dennis Robertson <dennis.m.robertson@gmail.com>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "^3.12"
+python = "^3.11"
 fastapi = "^0.115.5"
 uvicorn = "^0.32.1"
 pillow = "^11.0.0"
+python-multipart = "^0.0.17"
+torch = "2.4.0"
+lmdeploy = "^0.6.3"
 
+
+[[tool.poetry.source]]
+name = "pytorch"
+url = "https://download.pytorch.org/whl/cu121"
+priority = "supplemental"
 
 [build-system]
 requires = ["poetry-core"]
