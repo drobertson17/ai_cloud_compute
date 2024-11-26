@@ -1,24 +1,35 @@
 import base64
 from lmdeploy import pipeline
 
+from ai_cloud_compute.schemas import ImageDescriptionSummary
+from ai_cloud_compute import prompts
+
+
 VLM = pipeline('liuhaotian/llava-v1.6-vicuna-7b')
-VLM_SYSTEM_MESSAGE = "You are an assistant who perfectly describes images."
-VLM_USER_PROMPT = "Describe the following image in a paragraph."
+LLM = pipeline('internlm/internlm2_5-7b-chat')
 
 
 def describe_image_contents(image_data_b64: str):
     img_base64 = base64.b64encode(image_data_b64).decode("utf-8")
     
-    messages = [
-        {"role": "system", "content": VLM_SYSTEM_MESSAGE},
-        {
-            "role": "user",
-            "content": [
-                {"type" : "text", "text": VLM_USER_PROMPT},
-                {"type": "image_url", "image_url": f"data:image/jpeg;base64,{img_base64}"} 
-            ]
-        }
-    ]
-    print(messages)
+    response = VLM(prompts.image_description_prompt(img_base64))
 
-    return VLM(messages)
+    return response
+
+
+def summarize_image_description(description: str) -> ImageDescriptionSummary:
+    prompt_list = [
+        prompts.summary_generation_prompt(description),
+        prompts.keyword_generation_prompt(description),
+        prompts.title_generation_prompt(description),
+        prompts.classification_prompt(description)
+    ]
+
+    response = LLM(prompt_list)
+
+    return ImageDescriptionSummary(
+        short_desc=response[0],
+        keywords=response[1],
+        title=response[2],
+        classification=response[3],
+    )
